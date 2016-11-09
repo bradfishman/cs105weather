@@ -1,3 +1,5 @@
+//OUR API KEY FOR OPENWEATHERMAP: 7a3b0e6db8b7743c9fcc94f2caf73771
+
 function getWeather(){
     // This function gets called when the "Get Weather" button the the HTML page is clicked.
 	// First, we need to retrieve the desired ZIP code from the page:
