@@ -2,10 +2,17 @@
 <html>
     <head>
         <title>Bradley, Jake &amp; Grant's Weather Project</title>
+        <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,700" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="style.css">
         <script src="script.js"></script>
     </head>
     <body>
-    
+        <div class="container">
+            <h1>Weather</h1>
+            <h2>Enter a ZIP code below</h2>
+            <!--We're should probably add some validation to keep make sure the zip code is 5 chars, all numbers, etc.-->
+            <input type="text" id="zipcode" placeholder="61820">
+            <button onClick="">Get Weather</button>
+        </div>
     </body>
 </html>
