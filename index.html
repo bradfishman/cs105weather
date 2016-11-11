@@ -5,15 +5,19 @@
         <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,700" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="style.css">
         <script src="script.js"></script>
+        <script src="https://use.fontawesome.com/e1ae87a3f5.js"></script>
     </head>
     <body>
         <div class="container">
-            <h1>Weather</h1>
+            <h1 id="heading">Weather</h1>
             <h4>ENTER A ZIP CODE BELOW</h4>
             <!--We're should probably add some validation to keep make sure the zip code is 5 chars, all numbers, etc.-->
             <input type="text" id="zipcode" placeholder="61820" autocomplete="off">
             <br>
             <button id="submit" onclick="getWeather();">GET WEATHER</button>
+            <br>
+            <br>
+            <i id="report"></i>
         </div>
     </body>
 </html>
