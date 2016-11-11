@@ -11,9 +11,9 @@
             <h1>Weather</h1>
             <h4>ENTER A ZIP CODE BELOW</h4>
             <!--We're should probably add some validation to keep make sure the zip code is 5 chars, all numbers, etc.-->
-            <input type="text" id="zipcode" placeholder="61820">
+            <input type="text" id="zipcode" placeholder="61820" autocomplete="off">
             <br>
-            <button onClick="">GET WEATHER</button>
+            <button id="submit" onclick="getWeather();">GET WEATHER</button>
         </div>
     </body>
 </html>
