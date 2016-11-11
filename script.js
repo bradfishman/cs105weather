@@ -1,7 +1,7 @@
 var images = {
     //GENERIC PHOTOS
     default: "http://mollyirwin.typepad.com/.a/6a00d8349eed6669e20133f413a22f970b-pi",
-    clear: "http://susanstilwell.com/wp-content/uploads/2011/10/dreamstimefree_20823097.jpg",
+    clear: "https://snapshotsofwanaka.files.wordpress.com/2013/06/20130606-161727.jpg",
     thunderstorm: "http://farmersalmanac.com/wp-content/uploads/2015/06/Thunderstorm-5best.jpg",
     drizzle: "http://cdn.pcwallart.com/images/rain-cloud-wallpaper-3.jpg",
     rain: "https://i3.wallpaperscraft.com/image/rain_island_clouds_volume_sky_52002_1920x1080.jpg",
@@ -9,6 +9,7 @@ var images = {
     few: "http://mollyirwin.typepad.com/.a/6a00d8349eed6669e20133f413a22f970b-pi",
     scatteredbroken: "https://coclouds.com/wp-content/uploads/2011/06/illuminated-scattered-clouds-2011-06-21.jpg",
     overcast: "https://coclouds.com/wp-content/uploads/2011/11/morning-clouds-backlit-spotted-overcast-panoramic-2011-11-28.jpg",
+    mistfoghaze: "https://pompeypop.files.wordpress.com/2010/12/misty-common.jpg",
     //CHICAGO PHOTOS
     chicago: {
         clear: "http://cleartheairchicago.com/files/2014/09/2009-09-18_3060x2040_chicago_skyline.jpg",
@@ -16,13 +17,17 @@ var images = {
         few: "https://c2.staticflickr.com/6/5254/5436125688_966b27402a_b.jpg",
     },
     night: {
-        clear: "http://i.imgur.com/HF3Xxg1.jpg"
+        clear: "http://i.imgur.com/HF3Xxg1.jpg",
+        clouds: "http://pre03.deviantart.net/cd6a/th/pre/i/2008/239/6/5/cloudy_night_sky_by_ramosburrito.jpg"
     }
 }
 
 function getWeather() {
     //GET FIELD VALUE
     var zipcode = document.getElementById("zipcode").value;
+    if (zipcode == "") {
+        zipcode = "61820"
+    };
     //GENERATE URL AND SEND JSON REQ
     var url = "http://api.openweathermap.org/data/2.5/weather?zip=" + zipcode + ",US&appid=fc4193a032f2244550b8fb77a65f9c3d";
     jsonRequest(url);
@@ -30,20 +35,33 @@ function getWeather() {
 
 function processResponse(wxObject, rawResponse) {
     var icon = "";
-    var isnight = "false";
+    var isnight = false;
+    var currenttime = Date.now()/1000;
     
-    if (Date.now() > wxObject.sys.sunrise && Date.now() < wxObject.sys.sunset) {
+    if (currenttime > wxObject.sys.sunrise && currenttime < wxObject.sys.sunset) {
         icon = "fa-sun-o"
-        isnight = "false"
+        isnight = false
     } else {
         icon = "fa-moon-o"
-        isnight = "true"
+        isnight = true
     };
     
     var tempinf = Math.round(wxObject.main.temp * (9/5) - 459.67);
     var city = wxObject.name;
     
     document.getElementById("report").innerHTML = "<i id='report' class='fa " + icon + " fa-lg'><span id='reporttext'> " + city + " &ndash; " + tempinf + "&deg;</span></i>";
+    
+    var conddescrip = ""
+    
+    for (i = 0; i < wxObject.weather.length; i++) {
+        if (i > 0) {
+            conddescrip = conddescrip + "&#32; &amp; &#32;" + wxObject.weather[i].description
+        } else {
+            conddescrip = wxObject.weather[i].description
+        };
+    };
+    
+    document.getElementById("wxconditions").innerHTML = "<p id='wxconditions'>" + conddescrip.toUpperCase() + "</p>";
     
     var newimage = "";
     var conditions = wxObject.weather[0].id;
@@ -60,15 +78,15 @@ function processResponse(wxObject, rawResponse) {
         newimage = images.thunderstorm
     } else if (/\3\d\d/.test(conditions) == true) {
         newimage = images.drizzle
-    } else if (/\4\d\d/.test(conditions) == true) {
+    } else if (/\5\d\d/.test(conditions) == true) {
         newimage = images.rain
     } else if (/\6\d\d/.test(conditions) == true) {
         newimage = images.snow
     } else if (conditions == "800") {
-        if (isnight = "true") {
+        if (isnight == true) {
             newimage = images.night.clear
         } else {
-        newimage = images.clear
+            newimage = images.clear
         };
     } else if (conditions == "801") {
         newimage = images.few
@@ -76,13 +94,19 @@ function processResponse(wxObject, rawResponse) {
         newimage = images.scatteredbroken
     } else if (conditions == "804") {
         newimage = images.overcast
+    } else if (conditions == "701" || conditions == "721" || conditions == "741") {
+        newimage = images.mistfoghaze
     } else {
         newimage = ""
     };
     
     document.body.style.background = "linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.5)), url('" + newimage + "')";
     document.body.style.backgroundSize = "cover";
-    //alert(Date.now()); // This will print out the raw response you got from the server. You should delete this line later.     
+    document.body.style.backgroundPosition = "center center";
+    if (newimage == images.clear) {
+        document.body.style.backgroundPosition = "center bottom";
+    };
+    //alert(conditions); // This will print out the raw response you got from the server. You should delete this line later.     
         // To find out what the response looks like, you can also manually enter a query into your browser. Like this:
         // http://api.openweathermap.org/data/2.5/weather?zip=61801,US&appid=<yourkeygoeshere>	
         // You should use the wxObject object for your further coding. 
@@ -92,14 +116,16 @@ function processError() {
     // We never call this function either. It gets started if we encounter an error while retrieving info  
     // from the weather API.   
     // You can use this function to display an error message and image if something goes wrong
-    alert("There was an error while retrieving your weather");
+    alert("There was an error while retrieving your weather. This could be due to too many requests.");
     newimage = "";
     document.body.style.background = "linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.5)), url('" + newimage + "')";
     document.body.style.backgroundSize = "cover";
 }
 
 
-
+function showHint() {
+    alert("Important information to receive the 30 points extra credit: \n\nEnter one of the following cities/ZIP codes to see unique images for certain cities:\n\nChicago (e.g. 60609), Los Angeles (e.g. 90xxx)\n");
+}
 
 
 

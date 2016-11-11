@@ -9,6 +9,7 @@ body {
     background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.5)), url('http://mollyirwin.typepad.com/.a/6a00d8349eed6669e20133f413a22f970b-pi');
     background-repeat: no-repeat;
     background-size: cover;
+    background-position: center center;
 }
 h1 {
     font-family: 'Roboto', sans-serif;
@@ -81,4 +82,19 @@ button#submit:focus {
     font-family: 'Roboto', sans-serif;
     font-size: 17px;
     font-weight: 300;
+}
+#wxconditions {
+    font-family: 'Roboto', sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    color: white;
+}
+#hint {
+    opacity: 0.5;
+    transition-duration: 0.3s;
+}
+#hint:hover{
+    cursor: pointer;
+    opacity: 1;
+    transition-duration: 0.3s;
 }
