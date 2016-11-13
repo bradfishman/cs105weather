@@ -27,6 +27,7 @@ function getWeather() {
     var zipcode = document.getElementById("zipcode").value;
     if (zipcode == "") {
         zipcode = "61820"
+        document.getElementById("zipcode").value = zipcode
     };
     //GENERATE URL AND SEND JSON REQ
     var url = "http://api.openweathermap.org/data/2.5/weather?zip=" + zipcode + ",US&appid=fc4193a032f2244550b8fb77a65f9c3d";
@@ -74,13 +75,13 @@ function processResponse(wxObject, rawResponse) {
         } else {
             newimage = images.default
         };
-    } else if (/\2\d\d/.test(conditions) == true) {
+    } else if (/2\d\d/g.test(conditions) == true) {
         newimage = images.thunderstorm
-    } else if (/\3\d\d/.test(conditions) == true) {
+    } else if (/3\d\d/g.test(conditions) == true) {
         newimage = images.drizzle
-    } else if (/\5\d\d/.test(conditions) == true) {
+    } else if (/5\d\d/g.test(conditions) == true) {
         newimage = images.rain
-    } else if (/\6\d\d/.test(conditions) == true) {
+    } else if (/6\d\d/g.test(conditions) == true) {
         newimage = images.snow
     } else if (conditions == "800") {
         if (isnight == true) {
