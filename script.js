@@ -78,9 +78,20 @@ function processResponse(wxObject, rawResponse) {
 
     //DISPLAY THE WEATHER CONDITIONS FROM THE LOOP
     document.getElementById("wxconditions").innerHTML = "<p id='wxconditions'>" + conddescrip.toUpperCase() + "</p>";
+    
 
     //CONDITIONS IS THE WEATHER CONDITION ID FROM THE API RESPONSE AND LISTED IN THE API DOC
     var conditions = wxObject.weather[0].id;
+    
+    //PRIORITIZE THUNDERSTORM IMAGE BY LOOPING THROUGH THE WEATHER ARRAY AND SEEING IF ANY OF THE ELEMENTS DESCRIBES A THUNDERSTORM
+    //IF SO, SET SAID ELEMENT AS CONDITIONS
+    
+    for (var i = 0; i < wxObject.weather.length; i++) {
+        var wxid = wxObject.weather[i].id;
+        if (/2\d\d/g.test(wxid) == true) {
+            conditions = wxid;
+        }
+    }
 
     //CHANGE THE BACKGROUND IMAGE
     //TEST TO SEE IF THE LOCATION IS A SPECIFIC CITY FOR THE 30 PT EC ASSIGNMENT
