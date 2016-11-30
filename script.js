@@ -15,10 +15,35 @@ var images = {
         clear: "http://cleartheairchicago.com/files/2014/09/2009-09-18_3060x2040_chicago_skyline.jpg",
         thunderstorm: "https://s-media-cache-ak0.pinimg.com/originals/ba/f2/50/baf250148733333187b1d0c2a902f5ab.jpg",
         clouds: "https://c2.staticflickr.com/6/5254/5436125688_966b27402a_b.jpg",
+        rain: "http://msnbcmedia.msn.com/i/MSNBC/Components/Photo/_new/pb-130624-storm-cannon.jpg",
+        snow: "http://i.amz.mshcdn.com/i-_wGmdJAejXAq6C37eKpe35kc4=/fit-in/1440x1000/http%3A%2F%2Fmashable.com%2Fwp-content%2Fgallery%2Frecord-snowfall-in-boston-and-chicago%2FSnowfall%2520Chicago%2520Boston%252002.jpg",
         //CHICAGO NIGHT PHOTOS
         night: {
             clear: "http://www.richard-seaman.com/Wallpaper/USA/Cities/Chicago/ChicagoAtNightWide.jpg",
             clouds: "https://s-media-cache-ak0.pinimg.com/originals/2d/f8/26/2df82632870272e3f7858da0977511c5.jpg"
+        }
+    },
+    //LOS ANGELES PHOTOS
+    la: {
+        clear: "https://quitecontinental.files.wordpress.com/2010/08/bh-current.jpg",
+        clouds: "http://img.scotttactical.com/images/gallery/downtown-los-angeles-photography-dec-2015/IMG_7722.jpg",
+        rain: "https://media2.wnyc.org/i/1860/1240/l/80/1/536.jpg",
+        //NO SNOW IMAGE FOR LA (FOR OBVIOUS RESONS)
+        //LOS ANGELES NIGHT PHOTOS
+        night: {
+            clear: "http://lahomesandlifestyle.com/wp-content/uploads/2011/08/Los-Angeles-Homes-for-Sale.jpg"
+        }
+    },
+    //NEW YORK CITY PHOTOS
+    ny: {
+        clear: "http://www.rd.com/wp-content/uploads/sites/2/2016/01/01-statue-of-liberty-facts.jpg",
+        clouds: "http://blogs.voanews.com/all-about-america/files/2014/09/AP090602048119.jpg",
+        snow: "http://science.dodlive.mil/files/2013/02/winter-snow-storm-new-york-city-times-square-snow.jpg",
+        rain: "https://images3.alphacoders.com/243/243417.jpg",
+        mistfoghaze: "http://openwalls.com/image/35174/morning_city_1920x1200.jpg",
+        night: {
+            snow: "http://media.graytvinc.com/images/S042558051+(1).jpg",
+            rain: "http://www.socwall.com/images/wallpapers/37805-2560x1600.jpg"
         }
     },
     //GENERIC NIGHT PHOTOS
@@ -78,14 +103,14 @@ function processResponse(wxObject, rawResponse) {
 
     //DISPLAY THE WEATHER CONDITIONS FROM THE LOOP
     document.getElementById("wxconditions").innerHTML = "<p id='wxconditions'>" + conddescrip.toUpperCase() + "</p>";
-    
+
 
     //CONDITIONS IS THE WEATHER CONDITION ID FROM THE API RESPONSE AND LISTED IN THE API DOC
     var conditions = wxObject.weather[0].id;
-    
+
     //PRIORITIZE THUNDERSTORM IMAGE BY LOOPING THROUGH THE WEATHER ARRAY AND SEEING IF ANY OF THE ELEMENTS DESCRIBES A THUNDERSTORM
     //IF SO, SET SAID ELEMENT AS CONDITIONS
-    
+
     for (var i = 0; i < wxObject.weather.length; i++) {
         var wxid = wxObject.weather[i].id;
         if (/2\d\d/g.test(wxid) == true) {
@@ -93,59 +118,153 @@ function processResponse(wxObject, rawResponse) {
         }
     }
 
-    //CHANGE THE BACKGROUND IMAGE
-    //TEST TO SEE IF THE LOCATION IS A SPECIFIC CITY FOR THE 30 PT EC ASSIGNMENT
-    if (wxObject.name == "Chicago") {
-        if (conditions == "800") {
-            newimage = images.chicago.clear;
-            if (isnight == true) {
-                newimage = images.chicago.night.clear;
+    if (document.getElementById("usebing").checked == true) {
+        processwithbing();
+    } else {
+        processwithobject();
+    }
+
+    function processwithbing() {
+        //SEND BING IMAGE REQUEST
+        var bingquery = wxObject.name + " " + wxObject.weather[0].main + " weather";
+        var bingURL = "https://api.cognitive.microsoft.com/bing/v5.0/images/search?q=" + bingquery + "&count=10";
+
+        bingRequest(bingURL);
+
+        function continueBing(bingResponse) {
+            var imagewidth = 0;
+            var imagewidtharr = [];
+            for (var i = 0; i < bingResponse.value.length; i++) {
+                imagewidtharr.push(bingResponse.value[i].width);
             }
-        } else if (/8\d\d/g.test(conditions) == true) {
-            newimage = images.chicago.clouds;
-            if (isnight == true) {
-                newimage = images.chicago.night.clouds;
+            var maxwidth = imagewidtharr[0];
+            var maxwidthindex = 0;
+            for (var i = 0; i < imagewidtharr.length; i++) {
+                if (imagewidtharr[i] > maxwidth) {
+                    maxwidth = imagewidtharr[i];
+                    maxwidthindex = i;
+                }
             }
+            newimage = bingResponse.value[maxwidthindex].contentUrl;
+            applynewimage(newimage);
+        }
+
+        //DO NOT EDIT THE BELOW FUNCTION
+        function bingRequest(url) {
+            var con = new XMLHttpRequest();
+            con.onreadystatechange = function () {
+                if (con.readyState === XMLHttpRequest.DONE) {
+                    if (con.status === 200) {
+                        continueBing(JSON.parse(con.responseText));
+                    } else {
+                        bingError();
+                    }
+                }
+            }
+            con.open("GET", url, true);
+            con.setRequestHeader("Ocp-Apim-Subscription-Key", "c28eb25f513e4da7b3d74335530015f3");
+            con.send();
+        }
+    }
+
+    function processwithobject() {
+        //CHANGE THE BACKGROUND IMAGE
+        //TEST TO SEE IF THE LOCATION IS A SPECIFIC CITY FOR THE 30 PT EC ASSIGNMENT
+        if (wxObject.name == "Chicago") {
+            if (conditions == "800") {
+                newimage = images.chicago.clear;
+                if (isnight == true) {
+                    newimage = images.chicago.night.clear;
+                }
+            } else if (/8\d\d/g.test(conditions) == true) {
+                newimage = images.chicago.clouds;
+                if (isnight == true) {
+                    newimage = images.chicago.night.clouds;
+                }
+            } else if (/5\d\d/g.test(conditions) == true || /3\d\d/g.test(conditions) == true) {
+                newimage = images.chicago.rain;
+            } else if (/6\d\d/g.test(conditions) == true) {
+                newimage = images.chicago.snow;
+            } else if (/2\d\d/g.test(conditions) == true) {
+                newimage = images.chicago.thunderstorm;
+            } else {
+                newimage = "";
+            }
+        } else if (wxObject.name == "Los Angeles") {
+            if (conditions == "800") {
+                newimage = images.la.clear;
+                if (isnight == true) {
+                    newimage = images.la.night.clear;
+                }
+            } else if (/8\d\d/g.test(conditions) == true) {
+                newimage = images.la.clouds;
+            } else if (/5\d\d/g.test(conditions) == true || /3\d\d/g.test(conditions) == true || /2\d\d/g.test(conditions) == true) {
+                newimage = images.la.rain;
+            } else {
+                newimage = "";
+            }
+        } else if (wxObject.name == "New York" || wxObject.name == "Manhattan") {
+            if (conditions == "800") {
+                newimage = images.ny.clear;
+                /* if (isnight == true) {
+                    newimage = images.la.night.clear;
+                } */
+            } else if (/8\d\d/g.test(conditions) == true) {
+                newimage = images.ny.clouds;
+            } else if (/5\d\d/g.test(conditions) == true || /3\d\d/g.test(conditions) == true || /2\d\d/g.test(conditions) == true) {
+                newimage = images.ny.rain;
+                if (isnight == true) {
+                    newimage = images.ny.night.rain;
+                }
+            } else if (/6\d\d/g.test(conditions) == true) {
+                newimage = images.ny.snow;
+                if (isnight == true) {
+                    newimage = images.ny.night.snow;
+                }
+            } else if (conditions == "701" || conditions == "721" || conditions == "741") {
+                newimage = images.ny.mistfoghaze;
+            } else {
+                newimage = "";
+            }
+        } else if (/2\d\d/g.test(conditions) == true) {
+            newimage = images.thunderstorm;
+        } else if (/3\d\d/g.test(conditions) == true) {
+            newimage = images.drizzle;
+        } else if (/5\d\d/g.test(conditions) == true) {
+            newimage = images.rain;
+        } else if (/6\d\d/g.test(conditions) == true) {
+            newimage = images.snow;
+        } else if (conditions == "800") {
+            if (isnight == true) {
+                newimage = images.night.clear;
+            } else {
+                newimage = images.clear;
+            }
+        } else if (conditions == "801") {
+            newimage = images.few;
+        } else if (conditions == "802" || conditions == "803") {
+            newimage = images.scatteredbroken;
+        } else if (conditions == "804") {
+            newimage = images.overcast;
+        } else if (conditions == "701" || conditions == "721" || conditions == "741") {
+            newimage = images.mistfoghaze;
         } else {
             newimage = "";
         }
-    } else if (/2\d\d/g.test(conditions) == true) {
-        newimage = images.thunderstorm;
-    } else if (/3\d\d/g.test(conditions) == true) {
-        newimage = images.drizzle;
-    } else if (/5\d\d/g.test(conditions) == true) {
-        newimage = images.rain;
-    } else if (/6\d\d/g.test(conditions) == true) {
-        newimage = images.snow;
-    } else if (conditions == "800") {
-        if (isnight == true) {
-            newimage = images.night.clear;
-        } else {
-            newimage = images.clear;
-        }
-    } else if (conditions == "801") {
-        newimage = images.few;
-    } else if (conditions == "802" || conditions == "803") {
-        newimage = images.scatteredbroken;
-    } else if (conditions == "804") {
-        newimage = images.overcast;
-    } else if (conditions == "701" || conditions == "721" || conditions == "741") {
-        newimage = images.mistfoghaze;
-    } else {
-        newimage = "";
+        applynewimage(newimage);
     }
 
-    //APPLY NEW IMAGE TO THE BACKGROUND OF THE PAGE
-    document.body.style.background = "linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.5)), url('" + newimage + "')";
-    //SET CSS SO BACKGROUND COVERS THE PAGE
-    document.body.style.backgroundSize = "cover";
-    //SET THE BACKGROUND POSITION
-    document.body.style.backgroundPosition = "center center";
-    //IF THE BACKGROUND IS ONE THAT LOOKS BETTER IN THE CENTER BOTTOM POSITION, SET THAT
-    if (newimage == images.clear) {
-        document.body.style.backgroundPosition = "center bottom";
+    function applynewimage(newimage) { //APPLY NEW IMAGE TO THE BACKGROUND OF THE PAGE
+        document.body.style.background = "linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.5)), url('" + newimage + "')";
+        //SET CSS SO BACKGROUND COVERS THE PAGE
+        document.body.style.backgroundSize = "cover";
+        //SET THE BACKGROUND POSITION
+        document.body.style.backgroundPosition = "center center";
+        //IF THE BACKGROUND IS ONE THAT LOOKS BETTER IN THE CENTER BOTTOM POSITION, SET THAT
+        if (newimage == images.clear) {
+            document.body.style.backgroundPosition = "center bottom";
+        }
     }
-    //alert(conditions);
 }
 
 function processError() {
@@ -159,10 +278,13 @@ function processError() {
     document.getElementById("wxconditions").innerHTML = "";
 }
 
+function bingError() {
+    alert("Bing API encountered an error");
+}
 
 function showHint() {
     //SHOWS TIP TO USER IF QUESTION MARK IS CLICKED
-    alert("Important information to receive the 30 points extra credit: \n\nEnter one of the following cities/ZIP codes to see unique images for certain cities:\n\nChicago (e.g. 60609), Los Angeles (e.g. 90xxx)\n");
+    alert("Important information for the 30pt extra credit assignment: \n\nEnter one of the following cities/ZIP codes to see unique images for certain cities:\n\nChicago (e.g. 60609), Los Angeles (e.g. 90xxx)\n\nProject by Bradley Fishman, Grant Glowacki & Jake Moscardini\n");
 }
 
 //DO NOT EDIT BELOW
