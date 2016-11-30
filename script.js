@@ -1,3 +1,4 @@
+//Project by Bradley Fishman, Grant Glowacki, Jesse Moderwell & Jake Moscardini
 var images = {
     //GENERIC PHOTOS
     default: "http://mollyirwin.typepad.com/.a/6a00d8349eed6669e20133f413a22f970b-pi",
@@ -125,12 +126,19 @@ function processResponse(wxObject, rawResponse) {
     }
 
     function processwithbing() {
-        //SEND BING IMAGE REQUEST
-        var bingquery = wxObject.name + " " + wxObject.weather[0].main + " weather";
+        var daynight = "daytime"
+        if (isnight == false) {
+            daynight = "daytime";
+        } else {
+            daynight = "nighttime";
+        }
+        var bingquery = wxObject.name + " " + wxObject.weather[0].main + " weather " + daynight;
         var bingURL = "https://api.cognitive.microsoft.com/bing/v5.0/images/search?q=" + bingquery + "&count=10";
 
+        console.log(bingquery);
         bingRequest(bingURL);
 
+        //EXECUTED ONCE BING REQUEST RETURNS SUCCESSFULLY
         function continueBing(bingResponse) {
             var imagewidth = 0;
             var imagewidtharr = [];
@@ -284,7 +292,7 @@ function bingError() {
 
 function showHint() {
     //SHOWS TIP TO USER IF QUESTION MARK IS CLICKED
-    alert("Important information for the 30pt extra credit assignment: \n\nEnter one of the following cities/ZIP codes to see unique images for certain cities:\n\nChicago (e.g. 60609), Los Angeles (e.g. 90xxx)\n\nProject by Bradley Fishman, Grant Glowacki & Jake Moscardini\n");
+    alert("Important information for the 30pt extra credit assignment: \n\nThe following cities are supported with unique images when the Bing API is not being used: Chicago, New York, and Los Angeles. To see unique pictures for any city choose the Bing API.\n\nProject by Bradley Fishman, Grant Glowacki, Jesse Moderwell & Jake Moscardini\n");
 }
 
 //DO NOT EDIT BELOW

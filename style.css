@@ -32,9 +32,9 @@ div.container {
     display: block;
     position: relative;
     width: 300px;
-    top: 40%;
+    top: 35%;
     left: 50%;
-    transform: translateY(-40%);
+    transform: translateY(-35%);
     transform: translateX(-50%);
     text-align: center;
 }
